@@ -23,14 +23,14 @@ Self-hosted YouTube music streaming application built with Next.js.
 - 🎼 Create and manage playlists
 - 🌐 Global player - music continues playing across page navigation
 - 🔔 Toast notifications for user feedback
-- 🗂️ SQLite database for song and playlist management
+- � Simple JSON file storage - no database setup required
 - 🐳 Easy Docker deployment
 
 ## Tech Stack
 
 - **Frontend & Backend**: Next.js 15 (App Router)
 - **Styling**: Tailwind CSS v4
-- **Database**: SQLite with Prisma ORM
+- **Storage**: JSON file-based database
 - **Audio Streaming**: yt-dlp
 - **Icons**: Lucide React
 - **Containerization**: Docker
@@ -48,24 +48,20 @@ Self-hosted YouTube music streaming application built with Next.js.
    npm install
    ```
 
-2. **Set up the database:**
-   ```bash
-   npx prisma generate
-   npx prisma db push
-   ```
-
-3. **Install yt-dlp:**
+2. **Install yt-dlp:**
    ```bash
    pip install yt-dlp
    ```
 
-4. **Run the development server:**
+3. **Run the development server:**
    ```bash
    npm run dev
    ```
 
-5. **Open your browser:**
+4. **Open your browser:**
    Navigate to [http://localhost:3000](http://localhost:3000)
+
+The database file (`data/db.json`) will be created automatically on first run.
 
 ## Quick Start with Docker (Recommended)
 
@@ -86,10 +82,23 @@ Self-hosted YouTube music streaming application built with Next.js.
 3. **Access the application:**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
-4. **Stop the application:**
-   ```bash
-   docker-compose down
-   ```
+Your music library will be stored in `./data/db.json` and persists across container restarts.
+
+### Updating to Latest Version
+
+```bash
+docker-compose down
+docker-compose pull
+docker-compose up -d
+```
+
+### Complete Cleanup (removes all data)
+
+```bash
+docker-compose down -v
+docker rmi ghcr.io/bitc0de/bitify:latest
+rm -rf data/
+```
 
 The Docker image is automatically built and published to GitHub Container Registry on each release.
 
@@ -161,10 +170,10 @@ bitify/
 │   ├── SongCard.tsx
 │   └── Toast.tsx
 ├── lib/
-│   ├── prisma.ts
+│   ├── db.ts
 │   └── ytdlp.ts
-├── prisma/
-│   └── schema.prisma
+├── data/
+│   └── db.json (created automatically)
 ├── docker-compose.yml
 ├── Dockerfile
 ├── next.config.js
@@ -172,22 +181,27 @@ bitify/
 └── tsconfig.json
 ```
 
-## Environment Variables
+## Data Storage
 
-The application uses SQLite by default. The database file is stored at `prisma/dev.db`.
+All data is stored in a simple JSON file at `data/db.json`:
 
-You can customize the database location by setting the `DATABASE_URL` environment variable:
-
-```env
-DATABASE_URL="file:./dev.db"
+```json
+{
+  "songs": [],
+  "playlists": [],
+  "playlistSongs": []
+}
 ```
+
+The file is created automatically on first run. To backup your library, simply copy the `data/` folder.
 
 ## Notes
 
 - Audio files are **never downloaded** to the server
 - Streaming URLs are dynamically generated using `yt-dlp -g -f bestaudio`
-- The application requires `yt-dlp` and `ffmpeg` to be installed
-- Database automatically initializes on first run
+- The application requires `yt-dlp` and `ffmpeg` to be installed (included in Docker)
+- All data is stored in a simple JSON file that's created automatically on first run
+- Your music library persists in the `./data` folder
 
 ## License
 
