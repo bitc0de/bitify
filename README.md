@@ -7,7 +7,7 @@ Self-hosted YouTube music streaming application built with Next.js.
 ![Desktop](https://i.ibb.co/Y7S0bN8F/image.png)
 
 #### Mobile
-![Mobile](https://i.ibb.co/QjrnNxcT/image.png)
+![Mobile](https://i.ibb.co/wrQc23kz/image.png)
 
 #### Playlist
 ![Playlist](https://i.ibb.co/PvQmMDLx/image.png)
