@@ -6,13 +6,18 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies (use npm install instead of ci for better compatibility)
+# Install dependencies
 RUN npm install --production=false
 
 # Copy source code
 COPY . .
 
-# Build Next.js application
+# Build Next.js application with output tracing enabled
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN npm run build
+
+# Build Next.js application with output tracing enabled
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
 # Production stage
@@ -26,8 +31,8 @@ RUN pip3 install --no-cache-dir yt-dlp --break-system-packages
 
 WORKDIR /app
 
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs
