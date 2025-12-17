@@ -67,19 +67,46 @@ Self-hosted YouTube music streaming application built with Next.js.
 5. **Open your browser:**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
-## Docker Deployment
+## Quick Start with Docker (Recommended)
 
-1. **Build and run with Docker Compose:**
+1. **Download the docker-compose.yml file:**
+   ```bash
+   wget https://raw.githubusercontent.com/bitc0de/bitify/main/docker-compose.yml
+   ```
+   Or on Windows PowerShell:
+   ```powershell
+   Invoke-WebRequest -Uri https://raw.githubusercontent.com/bitc0de/bitify/main/docker-compose.yml -OutFile docker-compose.yml
+   ```
+
+2. **Start the application:**
    ```bash
    docker-compose up -d
    ```
 
-2. **Access the application:**
+3. **Access the application:**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
-3. **Stop the application:**
+4. **Stop the application:**
    ```bash
    docker-compose down
+   ```
+
+The Docker image is automatically built and published to GitHub Container Registry on each release.
+
+## Build from Source
+
+If you prefer to build the Docker image yourself:
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/bitc0de/bitify.git
+   cd bitify
+   ```
+
+2. **Build and run:**
+   ```bash
+   docker build -t bitify .
+   docker-compose up -d
    ```
 
 ## Usage

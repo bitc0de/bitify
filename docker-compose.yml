@@ -2,9 +2,7 @@ version: '3.8'
 
 services:
   bitify:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/bitc0de/bitify:latest
     container_name: bitify
     ports:
       - "3000:3000"
