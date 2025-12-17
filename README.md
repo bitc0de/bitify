@@ -1,4 +1,4 @@
-# Bitify 🎵
+![Bitify](https://i.ibb.co/RkRRZh6D/logo.png)
 
 Self-hosted YouTube music streaming application built with Next.js.
 
