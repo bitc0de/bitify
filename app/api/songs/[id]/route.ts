@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import db from '@/lib/db'
+import { getDb } from '@/lib/db'
 
 export async function DELETE(
   request: NextRequest,
@@ -10,6 +10,7 @@ export async function DELETE(
 
     // Instead of deleting, mark as not in library
     // This keeps the song in playlists but removes it from main library
+    const db = getDb()
     db.prepare('UPDATE songs SET isInLibrary = 0 WHERE id = ?').run(id)
 
     console.log('[API] Song removed from library:', id)

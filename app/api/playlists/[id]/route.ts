@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import db from '@/lib/db'
+import { getDb } from '@/lib/db'
 
 export async function DELETE(
   request: NextRequest,
@@ -8,6 +8,7 @@ export async function DELETE(
   try {
     const { id } = await params
 
+    const db = getDb()
     db.prepare('DELETE FROM playlists WHERE id = ?').run(id)
 
     console.log('[API] Playlist deleted:', id)
@@ -28,6 +29,7 @@ export async function GET(
   try {
     const { id } = await params
 
+    const db = getDb()
     const playlist = db.prepare('SELECT * FROM playlists WHERE id = ?').get(id) as any
 
     if (!playlist) {

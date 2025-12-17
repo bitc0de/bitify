@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import db from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { getYoutubeMetadata } from '@/lib/ytdlp'
 import { randomBytes } from 'crypto'
 
@@ -21,6 +21,7 @@ export async function POST(request: NextRequest) {
     console.log('[API] Got metadata:', metadata)
 
     // Check if song already exists
+    const db = getDb()
     const existingSong = db.prepare('SELECT * FROM songs WHERE youtubeId = ?').get(metadata.id) as any
 
     if (existingSong) {
@@ -59,6 +60,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
+    const db = getDb()
     const songs = db.prepare('SELECT * FROM songs WHERE isInLibrary = 1 ORDER BY createdAt DESC').all()
     return NextResponse.json(songs)
   } catch (error) {

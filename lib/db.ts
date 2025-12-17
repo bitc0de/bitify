@@ -4,7 +4,7 @@ import { mkdirSync, existsSync } from 'fs'
 
 let db: Database.Database | null = null
 
-function getDb() {
+export function getDb() {
   if (db) return db
 
   const dataDir = join(process.cwd(), 'data')
@@ -58,5 +58,3 @@ function getDb() {
 
   return db
 }
-
-export default getDb()

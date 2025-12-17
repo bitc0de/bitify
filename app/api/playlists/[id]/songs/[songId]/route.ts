@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import db from '@/lib/db'
+import { getDb } from '@/lib/db'
 
 export async function DELETE(
   request: NextRequest,
@@ -8,6 +8,7 @@ export async function DELETE(
   try {
     const { id, songId } = await params
 
+    const db = getDb()
     db.prepare('DELETE FROM playlistSongs WHERE playlistId = ? AND songId = ?').run(id, songId)
 
     console.log('[API] Song removed from playlist')

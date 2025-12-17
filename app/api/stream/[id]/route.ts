@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import db from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { getStreamUrl } from '@/lib/ytdlp'
 import { streamCache } from '@/lib/cache'
 
@@ -11,6 +11,7 @@ export async function GET(
     const { id } = await params
 
     // Get song from database
+    const db = getDb()
     const song = db.prepare('SELECT * FROM songs WHERE id = ?').get(id) as any
 
     if (!song) {

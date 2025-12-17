@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import db from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { randomBytes } from 'crypto'
 
 export async function GET() {
   try {
+    const db = getDb()
     const playlists = db.prepare('SELECT * FROM playlists ORDER BY createdAt DESC').all() as any[]
 
     // Get songs for each playlist
@@ -42,6 +43,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const db = getDb()
     const playlistId = randomBytes(16).toString('hex')
     db.prepare('INSERT INTO playlists (id, name) VALUES (?, ?)').run(playlistId, name)
     

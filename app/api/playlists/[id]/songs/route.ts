@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import db from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { randomBytes } from 'crypto'
 
 export async function POST(
@@ -18,6 +18,7 @@ export async function POST(
     }
 
     // Check if already in playlist
+    const db = getDb()
     const existing = db.prepare('SELECT * FROM playlistSongs WHERE playlistId = ? AND songId = ?').get(id, songId)
 
     if (existing) {
