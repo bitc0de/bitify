@@ -5,16 +5,12 @@ WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
-COPY prisma ./prisma/
 
 # Install dependencies
 RUN npm ci
 
 # Copy source code
 COPY . .
-
-# Generate Prisma Client
-RUN npx prisma generate
 
 # Build Next.js application
 RUN npm run build
@@ -37,19 +33,12 @@ ENV NEXT_TELEMETRY_DISABLED 1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Install Prisma CLI for db push command
-RUN npm install -g prisma
-
 # Copy necessary files from builder
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 
-# Copy Prisma schema and migrations
-COPY --chown=nextjs:nodejs prisma ./prisma/
-
-# Create database directory and set permissions
-RUN mkdir -p /app/prisma && chown -R nextjs:nodejs /app
+# Create data directory for database
+RUN mkdir -p /app/data && chown -R nextjs:nodejs /app
 
 USER nextjs
 

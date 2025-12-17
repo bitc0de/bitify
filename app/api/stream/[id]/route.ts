@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import db from '@/lib/db'
 import { getStreamUrl } from '@/lib/ytdlp'
 import { streamCache } from '@/lib/cache'
 
@@ -11,9 +11,7 @@ export async function GET(
     const { id } = await params
 
     // Get song from database
-    const song = await prisma.song.findUnique({
-      where: { id },
-    })
+    const song = db.prepare('SELECT * FROM songs WHERE id = ?').get(id) as any
 
     if (!song) {
       return NextResponse.json(

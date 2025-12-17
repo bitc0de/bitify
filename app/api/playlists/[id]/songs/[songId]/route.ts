@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import db from '@/lib/db'
 
 export async function DELETE(
   request: NextRequest,
@@ -8,14 +8,7 @@ export async function DELETE(
   try {
     const { id, songId } = await params
 
-    await prisma.playlistSong.delete({
-      where: {
-        playlistId_songId: {
-          playlistId: id,
-          songId: songId,
-        },
-      },
-    })
+    db.prepare('DELETE FROM playlistSongs WHERE playlistId = ? AND songId = ?').run(id, songId)
 
     console.log('[API] Song removed from playlist')
     return NextResponse.json({ success: true })

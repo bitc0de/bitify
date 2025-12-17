@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import db from '@/lib/db'
 
 export async function DELETE(
   request: NextRequest,
@@ -10,10 +10,7 @@ export async function DELETE(
 
     // Instead of deleting, mark as not in library
     // This keeps the song in playlists but removes it from main library
-    await prisma.song.update({
-      where: { id },
-      data: { isInLibrary: false },
-    })
+    db.prepare('UPDATE songs SET isInLibrary = 0 WHERE id = ?').run(id)
 
     console.log('[API] Song removed from library:', id)
     return NextResponse.json({ success: true })

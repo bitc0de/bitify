@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import db from '@/lib/db'
 
 export async function DELETE(
   request: NextRequest,
@@ -8,9 +8,7 @@ export async function DELETE(
   try {
     const { id } = await params
 
-    await prisma.playlist.delete({
-      where: { id },
-    })
+    db.prepare('DELETE FROM playlists WHERE id = ?').run(id)
 
     console.log('[API] Playlist deleted:', id)
     return NextResponse.json({ success: true })
@@ -30,19 +28,7 @@ export async function GET(
   try {
     const { id } = await params
 
-    const playlist = await prisma.playlist.findUnique({
-      where: { id },
-      include: {
-        playlistSongs: {
-          include: {
-            song: true,
-          },
-          orderBy: {
-            addedAt: 'asc',
-          },
-        },
-      },
-    })
+    const playlist = db.prepare('SELECT * FROM playlists WHERE id = ?').get(id) as any
 
     if (!playlist) {
       return NextResponse.json(
@@ -50,6 +36,16 @@ export async function GET(
         { status: 404 }
       )
     }
+
+    // Get songs for this playlist
+    const songs = db.prepare(`
+      SELECT s.*, ps.addedAt FROM songs s
+      INNER JOIN playlistSongs ps ON s.id = ps.songId
+      WHERE ps.playlistId = ?
+      ORDER BY ps.addedAt ASC
+    `).all(id)
+
+    playlist.playlistSongs = songs.map((song: any) => ({ song }))
 
     return NextResponse.json(playlist)
   } catch (error) {

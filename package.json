@@ -4,14 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "prisma:generate": "prisma generate",
-    "prisma:push": "prisma db push"
+    "lint": "next lint"
   },
   "dependencies": {
-    "@prisma/client": "^5.22.0",
+    "better-sqlite3": "^11.7.0",
     "lucide-react": "^0.454.0",
     "next": "^15.0.3",
     "react": "^18.3.1",
@@ -19,11 +17,11 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.0",
+    "@types/better-sqlite3": "^7.6.12",
     "@types/node": "^22.9.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "postcss": "^8.4.49",
-    "prisma": "^5.22.0",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.6.3"
   }
