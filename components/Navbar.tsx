@@ -3,11 +3,51 @@
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { Home, ListMusic, Github, Star } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 export default function Navbar() {
   const pathname = usePathname()
+  const [stars, setStars] = useState<number | null>(null)
 
   const isActive = (path: string) => pathname === path
+
+  useEffect(() => {
+    const fetchStars = () => {
+      fetch('https://api.github.com/repos/bitc0de/bitify')
+        .then(res => res.json())
+        .then(data => {
+          if (data.stargazers_count !== undefined) {
+            setStars(data.stargazers_count)
+          }
+        })
+        .catch((err) => {
+          console.error('Error fetching stars:', err)
+          setStars(null)
+        })
+    }
+
+    fetchStars()
+
+    // Refresh when user comes back to the tab
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchStars()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [])
+
+  const formatStars = (count: number) => {
+    if (count >= 1000) {
+      return `${(count / 1000).toFixed(1)}k`
+    }
+    return count.toString()
+  }
 
   return (
     <nav className="bg-gray-900 border-b border-gray-800 sticky top-0 z-40 flex-shrink-0">
@@ -63,7 +103,7 @@ export default function Navbar() {
 
           {/* GitHub Stars Badge */}
           <a
-            href="https://github.com/vercel/next.js"
+            href="https://github.com/bitc0de/bitify"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 px-2 sm:px-4 py-1.5 sm:py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors text-gray-300 hover:text-white"
@@ -71,7 +111,9 @@ export default function Navbar() {
             <Github size={16} className="sm:w-5 sm:h-5" />
             <span className="text-xs sm:text-sm font-medium hidden xs:inline">Star</span>
             <Star size={12} className="fill-yellow-400 text-yellow-400 sm:w-4 sm:h-4" />
-            <span className="text-xs sm:text-sm font-semibold">120k</span>
+            {stars !== null && (
+              <span className="text-xs sm:text-sm font-semibold">{formatStars(stars)}</span>
+            )}
           </a>
         </div>
 
