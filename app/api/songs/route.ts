@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDb } from '@/lib/db'
+import { db } from '@/lib/db'
 import { getYoutubeMetadata } from '@/lib/ytdlp'
-import { randomBytes } from 'crypto'
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,16 +20,14 @@ export async function POST(request: NextRequest) {
     console.log('[API] Got metadata:', metadata)
 
     // Check if song already exists
-    const db = getDb()
-    const existingSong = db.prepare('SELECT * FROM songs WHERE youtubeId = ?').get(metadata.id) as any
+    const existingSong = db.getSongByYoutubeId(metadata.id)
 
     if (existingSong) {
       console.log('[API] Song already exists:', existingSong.id)
       
       // If song was previously removed from library, restore it
       if (!existingSong.isInLibrary) {
-        db.prepare('UPDATE songs SET isInLibrary = 1 WHERE id = ?').run(existingSong.id)
-        const updatedSong = db.prepare('SELECT * FROM songs WHERE id = ?').get(existingSong.id)
+        const updatedSong = db.updateSong(existingSong.id, { isInLibrary: true })
         console.log('[API] Song restored to library:', existingSong.id)
         return NextResponse.json(updatedSong)
       }
@@ -39,15 +36,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Create new song in database
-    const songId = randomBytes(16).toString('hex')
-    db.prepare(`
-      INSERT INTO songs (id, youtubeId, title, channelName, thumbnail, duration)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `).run(songId, metadata.id, metadata.title, metadata.channel, metadata.thumbnail, metadata.duration)
+    const song = db.createSong({
+      youtubeId: metadata.id,
+      title: metadata.title,
+      channelName: metadata.channel,
+      thumbnail: metadata.thumbnail,
+      duration: metadata.duration,
+    })
 
-    const song = db.prepare('SELECT * FROM songs WHERE id = ?').get(songId)
-
-    console.log('[API] Song created successfully:', songId)
+    console.log('[API] Song created successfully:', song.id)
     return NextResponse.json(song)
   } catch (error) {
     console.error('[API] Error adding song:', error)
@@ -60,8 +57,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    const db = getDb()
-    const songs = db.prepare('SELECT * FROM songs WHERE isInLibrary = 1 ORDER BY createdAt DESC').all()
+    const songs = db.getSongs()
     return NextResponse.json(songs)
   } catch (error) {
     console.error('Error fetching songs:', error)

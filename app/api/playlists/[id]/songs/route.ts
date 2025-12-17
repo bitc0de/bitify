@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDb } from '@/lib/db'
-import { randomBytes } from 'crypto'
+import { db } from '@/lib/db'
 
 export async function POST(
   request: NextRequest,
@@ -17,30 +16,16 @@ export async function POST(
       )
     }
 
-    // Check if already in playlist
-    const db = getDb()
-    const existing = db.prepare('SELECT * FROM playlistSongs WHERE playlistId = ? AND songId = ?').get(id, songId)
+    const playlistSong = db.addSongToPlaylist(id, songId)
 
-    if (existing) {
+    if (!playlistSong) {
       return NextResponse.json(
         { error: 'Song already in playlist' },
         { status: 400 }
       )
     }
 
-    // Get next position
-    const maxPosition = db.prepare('SELECT MAX(position) as max FROM playlistSongs WHERE playlistId = ?').get(id) as any
-    const position = (maxPosition?.max ?? -1) + 1
-
-    const playlistSongId = randomBytes(16).toString('hex')
-    db.prepare(`
-      INSERT INTO playlistSongs (id, playlistId, songId, position)
-      VALUES (?, ?, ?, ?)
-    `).run(playlistSongId, id, songId, position)
-
-    const playlistSong = db.prepare('SELECT * FROM playlistSongs WHERE id = ?').get(playlistSongId)
-
-    console.log('[API] Song added to playlist:', playlistSongId)
+    console.log('[API] Song added to playlist:', playlistSong.id)
     return NextResponse.json(playlistSong)
   } catch (error) {
     console.error('[API] Error adding song to playlist:', error)

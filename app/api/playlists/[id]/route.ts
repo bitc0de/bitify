@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDb } from '@/lib/db'
+import { db } from '@/lib/db'
 
 export async function DELETE(
   request: NextRequest,
@@ -8,8 +8,7 @@ export async function DELETE(
   try {
     const { id } = await params
 
-    const db = getDb()
-    db.prepare('DELETE FROM playlists WHERE id = ?').run(id)
+    db.deletePlaylist(id)
 
     console.log('[API] Playlist deleted:', id)
     return NextResponse.json({ success: true })
@@ -29,8 +28,7 @@ export async function GET(
   try {
     const { id } = await params
 
-    const db = getDb()
-    const playlist = db.prepare('SELECT * FROM playlists WHERE id = ?').get(id) as any
+    const playlist = db.getPlaylistById(id)
 
     if (!playlist) {
       return NextResponse.json(
@@ -40,16 +38,13 @@ export async function GET(
     }
 
     // Get songs for this playlist
-    const songs = db.prepare(`
-      SELECT s.*, ps.addedAt FROM songs s
-      INNER JOIN playlistSongs ps ON s.id = ps.songId
-      WHERE ps.playlistId = ?
-      ORDER BY ps.addedAt ASC
-    `).all(id)
+    const playlistSongs = db.getPlaylistSongs(id)
+    const playlistWithSongs = {
+      ...playlist,
+      playlistSongs
+    }
 
-    playlist.playlistSongs = songs.map((song: any) => ({ song }))
-
-    return NextResponse.json(playlist)
+    return NextResponse.json(playlistWithSongs)
   } catch (error) {
     console.error('[API] Error fetching playlist:', error)
     return NextResponse.json(

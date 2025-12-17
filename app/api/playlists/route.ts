@@ -1,24 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDb } from '@/lib/db'
-import { randomBytes } from 'crypto'
+import { db } from '@/lib/db'
 
 export async function GET() {
   try {
-    const db = getDb()
-    const playlists = db.prepare('SELECT * FROM playlists ORDER BY createdAt DESC').all() as any[]
+    const playlists = db.getPlaylists()
 
     // Get songs for each playlist
     const playlistsWithSongs = playlists.map(playlist => {
-      const songs = db.prepare(`
-        SELECT s.* FROM songs s
-        INNER JOIN playlistSongs ps ON s.id = ps.songId
-        WHERE ps.playlistId = ?
-        ORDER BY ps.position
-      `).all(playlist.id)
-
+      const playlistSongs = db.getPlaylistSongs(playlist.id)
       return {
         ...playlist,
-        playlistSongs: songs.map((song: any) => ({ song }))
+        playlistSongs
       }
     })
 
@@ -43,13 +35,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const db = getDb()
-    const playlistId = randomBytes(16).toString('hex')
-    db.prepare('INSERT INTO playlists (id, name) VALUES (?, ?)').run(playlistId, name)
-    
-    const playlist = db.prepare('SELECT * FROM playlists WHERE id = ?').get(playlistId)
+    const playlist = db.createPlaylist(name)
 
-    console.log('[API] Playlist created:', playlistId)
+    console.log('[API] Playlist created:', playlist.id)
     return NextResponse.json(playlist)
   } catch (error) {
     console.error('[API] Error creating playlist:', error)
