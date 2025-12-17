@@ -43,9 +43,6 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 
-# Copy public folder if it exists
-COPY --from=builder --chown=nextjs:nodejs /app/public* ./public/ 2>/dev/null || true
-
 # Create database directory
 RUN mkdir -p /app/prisma && chown -R nextjs:nodejs /app
 
