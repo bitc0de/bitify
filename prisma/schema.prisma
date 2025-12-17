@@ -1,0 +1,44 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Song {
+  id          String   @id @default(uuid())
+  youtubeId   String   @unique
+  title       String
+  channelName String
+  thumbnail   String
+  duration    Int      // in seconds
+  addedAt     DateTime @default(now())
+  isInLibrary Boolean  @default(true)  // If false, only exists in playlists
+  
+  playlistSongs PlaylistSong[]
+}
+
+model Playlist {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  
+  playlistSongs PlaylistSong[]
+}
+
+model PlaylistSong {
+  id         String   @id @default(uuid())
+  playlistId String
+  songId     String
+  addedAt    DateTime @default(now())
+  
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  song     Song     @relation(fields: [songId], references: [id], onDelete: Cascade)
+  
+  @@unique([playlistId, songId])
+}

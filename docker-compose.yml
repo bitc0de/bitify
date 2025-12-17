@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  bitify:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bitify
+    ports:
+      - "3000:3000"
+    volumes:
+      # Persist database
+      - ./prisma:/app/prisma
+      # Optional: persist yt-dlp cache
+      - yt-dlp-cache:/home/nextjs/.cache/yt-dlp
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=file:/app/prisma/dev.db
+    restart: unless-stopped
+    command: sh -c "npx prisma db push && node server.js"
+
+volumes:
+  yt-dlp-cache:

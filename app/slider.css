@@ -1,0 +1,61 @@
+/* Custom slider styles for PlayerBar */
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Webkit (Chrome, Safari, Edge) */
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ffffff;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+  position: relative;
+  z-index: 20;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  margin-top: -6.5px; /* (14px - 1px) / 2 = centra el thumb de 14px con la barra de 1px */
+}
+
+input[type='range']:hover::-webkit-slider-thumb,
+input[type='range']:active::-webkit-slider-thumb {
+  opacity: 1;
+}
+
+input[type='range']::-webkit-slider-runnable-track {
+  background: transparent;
+  height: 1px;
+  cursor: pointer;
+}
+
+/* Firefox */
+input[type='range']::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ffffff;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  opacity: 0;
+  transition: opacity 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+input[type='range']:hover::-moz-range-thumb,
+input[type='range']:active::-moz-range-thumb {
+  opacity: 1;
+}
+
+input[type='range']::-moz-range-track {
+  background: transparent;
+  height: 1px;
+  cursor: pointer;
+}
+
