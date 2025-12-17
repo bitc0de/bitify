@@ -33,10 +33,16 @@ interface Database {
   playlistSongs: PlaylistSong[]
 }
 
-const dataDir = join(process.cwd(), 'data')
-const dbPath = join(dataDir, 'db.json')
+function getDataDir() {
+  return join(process.cwd(), 'data')
+}
+
+function getDbPath() {
+  return join(getDataDir(), 'db.json')
+}
 
 function ensureDataDir() {
+  const dataDir = getDataDir()
   if (!existsSync(dataDir)) {
     mkdirSync(dataDir, { recursive: true })
   }
@@ -44,6 +50,7 @@ function ensureDataDir() {
 
 function readDb(): Database {
   ensureDataDir()
+  const dbPath = getDbPath()
   
   if (!existsSync(dbPath)) {
     const initialDb: Database = {
@@ -60,6 +67,7 @@ function readDb(): Database {
 
 function writeDb(db: Database) {
   ensureDataDir()
+  const dbPath = getDbPath()
   writeFileSync(dbPath, JSON.stringify(db, null, 2))
 }
 
