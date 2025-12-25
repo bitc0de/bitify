@@ -14,26 +14,28 @@ Self-hosted YouTube music streaming application built with Next.js.
 
 ## Features
 
-- 🎵 Stream music from YouTube without downloading files
-- 🎨 Beautiful dark mode interface
-- 📱 Fully responsive design (mobile & desktop)
-- 🎮 Full playback controls (play, pause, next, previous, shuffle)
-- 🔊 Volume control with visual feedback
-- 📊 Progress bar with seeking and time display
-- 🎼 Create and manage playlists
-- 🌐 Global player - music continues playing across page navigation
-- 🔔 Toast notifications for user feedback
-- � Simple JSON file storage - no database setup required
-- 🐳 Easy Docker deployment
+- Stream music from YouTube without downloading files
+- Beautiful dark mode interface
+- Fully responsive design (mobile & desktop)
+- Full playback controls (play, pause, next, previous, shuffle)
+- Volume control with visual feedback
+- Progress bar with seeking and time display
+- Create and manage playlists
+- Global player - music continues playing across page navigation
+- Toast notifications for user feedback
+- Simple JSON file storage - no database setup required
+- Easy Docker deployment
+## Recent Updates
 
-## Tech Stack
+### v1.1.0 - Latest Improvements
 
-- **Frontend & Backend**: Next.js 15 (App Router)
-- **Styling**: Tailwind CSS v4
-- **Storage**: JSON file-based database
-- **Audio Streaming**: yt-dlp
-- **Icons**: Lucide React
-- **Containerization**: Docker
+- ✅ **Direct song deletion**: Removed confirmation dialogs when deleting songs from home page for faster workflow
+- ✅ **Bulk playlist creation**: Add entire playlists directly from YouTube playlist URLs
+- ✅ **Song tags**: Display playlist tags on song cards in the home page for better organization
+- ✅ **Cross-playlist song movement**: Move songs between different playlists with a single click
+- ✅ **Mobile UI improvements**: Song action buttons now appear above the player bar on mobile devices
+- ✅ **Bulk song selection**: Select and delete multiple songs at once from the home page for efficient management
+
 
 ## Prerequisites
 
@@ -48,12 +50,27 @@ Self-hosted YouTube music streaming application built with Next.js.
    npm install
    ```
 
-2. **Install yt-dlp:**
+2. **Create Python virtual environment:**
+   ```bash
+   python -m venv .venv
+   ```
+
+3. **Activate the virtual environment:**
+   - **Linux/macOS:**
+     ```bash
+     source .venv/bin/activate
+     ```
+   - **Windows:**
+     ```bash
+     .venv\Scripts\activate
+     ```
+
+4. **Install yt-dlp:**
    ```bash
    pip install yt-dlp
    ```
 
-3. **Run the development server:**
+5. **Run the development server:**
    ```bash
    npm run dev
    ```
@@ -127,59 +144,6 @@ If you prefer to build the Docker image yourself:
 5. **Shuffle mode**: Toggle shuffle to randomize playback order
 6. **Navigate freely**: Music continues playing as you browse different pages
 
-## API Endpoints
-
-- `POST /api/songs` - Add a new song from YouTube URL
-- `GET /api/songs` - Get all songs from library
-- `DELETE /api/songs` - Remove a song from library
-- `GET /api/stream/[id]` - Get streaming URL for a song
-- `GET /api/playlists` - Get all playlists
-- `POST /api/playlists` - Create a new playlist
-- `GET /api/playlists/[id]` - Get a specific playlist with songs
-- `PUT /api/playlists/[id]` - Update playlist name
-- `DELETE /api/playlists/[id]` - Delete a playlist
-- `POST /api/playlists/[id]/songs` - Add a song to playlist
-- `DELETE /api/playlists/[id]/songs` - Remove a song from playlist
-- `POST /api/admin/update` - Update yt-dlp to the latest version
-
-## Project Structure
-
-```
-bitify/
-├── app/
-│   ├── api/
-│   │   ├── admin/update/
-│   │   ├── playlists/
-│   │   │   └── [id]/
-│   │   ├── songs/
-│   │   └── stream/[id]/
-│   ├── playlists/
-│   │   ├── [id]/
-│   │   └── page.tsx
-│   ├── globals.css
-│   ├── icon.svg
-│   ├── layout.tsx
-│   ├── page.tsx
-│   └── slider.css
-├── components/
-│   ├── GlobalPlayer.tsx
-│   ├── Header.tsx
-│   ├── Navbar.tsx
-│   ├── PlayerBar.tsx
-│   ├── PlayerContext.tsx
-│   ├── SongCard.tsx
-│   └── Toast.tsx
-├── lib/
-│   ├── db.ts
-│   └── ytdlp.ts
-├── data/
-│   └── db.json (created automatically)
-├── docker-compose.yml
-├── Dockerfile
-├── next.config.js
-├── package.json
-└── tsconfig.json
-```
 
 ## Data Storage
 
@@ -207,6 +171,3 @@ The file is created automatically on first run. To backup your library, simply c
 
 MIT
 
-## Author
-
-Built with ❤️ using Next.js and yt-dlp

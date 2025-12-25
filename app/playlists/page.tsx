@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, Trash2, Music, Play } from 'lucide-react'
+import { Plus, Trash2, Music, Play, Menu, X } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import SongCard from '@/components/SongCard'
 import { useToast } from '@/components/Toast'
@@ -31,8 +31,11 @@ export default function PlaylistsPage() {
   const [playlists, setPlaylists] = useState<Playlist[]>([])
   const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null)
   const [newPlaylistName, setNewPlaylistName] = useState('')
+  const [newPlaylistUrl, setNewPlaylistUrl] = useState('')
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [playlistSongs, setPlaylistSongs] = useState<Song[]>([])
+  const [isCreating, setIsCreating] = useState(false)
+  const [showSidebar, setShowSidebar] = useState(false)
   const { showToast } = useToast()
   const { playSong, isPlaylist, isShuffled, toggleShuffle } = usePlayer()
 
@@ -63,25 +66,41 @@ export default function PlaylistsPage() {
     e.preventDefault()
     if (!newPlaylistName.trim()) return
 
+    setIsCreating(true)
     try {
       const response = await fetch('/api/playlists', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name: newPlaylistName }),
+        body: JSON.stringify({ 
+          name: newPlaylistName,
+          youtubeUrl: newPlaylistUrl.trim() || undefined
+        }),
       })
 
       if (response.ok) {
-        const playlist = await response.json()
-        setPlaylists((prev) => [{ ...playlist, playlistSongs: [] }, ...prev])
+        const result = await response.json()
+        setPlaylists((prev) => [result.playlist, ...prev])
+        
+        if (result.addedSongs > 0) {
+          showToast(`Playlist created with ${result.addedSongs} songs!`, 'success')
+        } else {
+          showToast('Playlist created', 'success')
+        }
+        
         setNewPlaylistName('')
+        setNewPlaylistUrl('')
         setShowCreateForm(false)
-        showToast('Playlist created', 'success')
+      } else {
+        const error = await response.json()
+        showToast(error.error || 'Error creating playlist', 'error')
       }
     } catch (error) {
       console.error('Error creating playlist:', error)
       showToast('Error creating playlist', 'error')
+    } finally {
+      setIsCreating(false)
     }
   }
 
@@ -142,6 +161,41 @@ export default function PlaylistsPage() {
     }
   }
 
+  const handleMoveToPlaylist = async (songId: string, fromPlaylistId: string, toPlaylistId: string) => {
+    try {
+      // Add song to the target playlist
+      const addResponse = await fetch(`/api/playlists/${toPlaylistId}/songs`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ songId }),
+      })
+
+      if (!addResponse.ok) {
+        const data = await addResponse.json()
+        showToast(data.error || 'Error moving song to playlist', 'error')
+        return
+      }
+
+      // Remove song from current playlist
+      const removeResponse = await fetch(`/api/playlists/${fromPlaylistId}/songs/${songId}`, {
+        method: 'DELETE',
+      })
+
+      if (removeResponse.ok) {
+        // Update the playlists state
+        await fetchPlaylists()
+        showToast('Song moved to playlist', 'success')
+      } else {
+        showToast('Song added to new playlist but failed to remove from current', 'error')
+      }
+    } catch (error) {
+      console.error('Error moving song between playlists:', error)
+      showToast('Error moving song between playlists', 'error')
+    }
+  }
+
   const handlePlaySong = (song: Song) => {
     const index = playlistSongs.findIndex((s) => s.id === song.id)
     playSong(song, index, playlistSongs, true)
@@ -162,9 +216,23 @@ export default function PlaylistsPage() {
     <div className="flex flex-col h-screen overflow-hidden">
       <Navbar />
 
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+      {/* Mobile header with menu button */}
+      <div className="lg:hidden flex items-center justify-between p-4 border-b border-gray-800 z-50 relative">
+        <h1 className="text-xl font-bold text-white">Playlists</h1>
+        <button
+          onClick={() => setShowSidebar(!showSidebar)}
+          className="p-2 cursor-pointer text-gray-400 hover:text-white transition-colors"
+          title={showSidebar ? "Close playlists" : "Show playlists"}
+        >
+          {showSidebar ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
+
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
         {/* Playlists sidebar */}
-        <div className="w-full lg:w-80 border-b lg:border-b-0 lg:border-r border-gray-800 overflow-y-auto p-3 sm:p-6">
+        <div className={`${
+          showSidebar ? 'block' : 'hidden'
+        } lg:block absolute lg:relative inset-0 lg:inset-auto z-40 lg:z-auto w-full lg:w-80 bg-gray-900 lg:bg-transparent border-b lg:border-b-0 lg:border-r border-gray-800 overflow-y-auto p-3 sm:p-6`}>
             <div className="mb-4">
               {!showCreateForm ? (
                 <button
@@ -184,18 +252,27 @@ export default function PlaylistsPage() {
                     className="w-full px-4 py-2 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     autoFocus
                   />
+                  <input
+                    type="url"
+                    value={newPlaylistUrl}
+                    onChange={(e) => setNewPlaylistUrl(e.target.value)}
+                    placeholder="YouTube playlist URL (optional)..."
+                    className="w-full px-4 py-2 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
                   <div className="flex gap-2">
                     <button
                       type="submit"
-                      className="flex-1 cursor-pointer px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                      disabled={isCreating}
+                      className="flex-1 cursor-pointer px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Create
+                      {isCreating ? 'Creating...' : 'Create'}
                     </button>
                     <button
                       type="button"
                       onClick={() => {
                         setShowCreateForm(false)
                         setNewPlaylistName('')
+                        setNewPlaylistUrl('')
                       }}
                       className="flex-1 cursor-pointer px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
                     >
@@ -222,7 +299,10 @@ export default function PlaylistsPage() {
                     }`}
                   >
                     <div
-                      onClick={() => setSelectedPlaylist(playlist)}
+                      onClick={() => {
+                        setSelectedPlaylist(playlist)
+                        setShowSidebar(false) // Close sidebar on mobile when selecting playlist
+                      }}
                       className="flex-1 min-w-0 cursor-pointer"
                     >
                       <h3 className="text-white font-semibold truncate">
@@ -239,6 +319,7 @@ export default function PlaylistsPage() {
                           onClick={(e) => {
                             e.stopPropagation()
                             handlePlayPlaylist(playlist)
+                            setShowSidebar(false) // Close sidebar on mobile when playing playlist
                           }}
                           className="p-2 cursor-pointer bg-green-500 rounded-full hover:bg-green-600 transition-colors opacity-100"
                           title="Play playlist"
@@ -262,6 +343,14 @@ export default function PlaylistsPage() {
               )}
             </div>
           </div>
+
+          {/* Mobile overlay */}
+          {showSidebar && (
+            <div
+              className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+              onClick={() => setShowSidebar(false)}
+            />
+          )}
 
           {/* Playlist content */}
           <main className="flex-1 overflow-y-auto pb-36 sm:pb-32 p-3 sm:p-6">
@@ -301,6 +390,9 @@ export default function PlaylistsPage() {
                       song={ps.song}
                       onPlay={handlePlaySong}
                       onDelete={handleRemoveSongFromPlaylist}
+                      playlists={playlists}
+                      currentPlaylistId={selectedPlaylist.id}
+                      onMoveToPlaylist={handleMoveToPlaylist}
                     />
                   ))}
                 </div>

@@ -180,7 +180,7 @@ export default function PlayerBar({
 
   if (!currentSong) {
     return (
-      <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 p-4">
+      <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 p-4 z-50">
         <div className="flex items-center justify-center text-gray-500">
           Select a song to start playing
         </div>
@@ -191,8 +191,8 @@ export default function PlayerBar({
   return (
     <>
       <audio ref={audioRef} />
-      <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 p-2 sm:p-4">
-        <div className="flex flex-col gap-2 sm:gap-3">
+      <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 p-2 sm:p-4 z-50">
+        <div className="flex flex-col gap-2 sm:gap-3 z-50">
           {/* Song Info - Always on top in mobile */}
           <div className="flex items-center gap-3 w-full">
             <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-md overflow-hidden flex-shrink-0">

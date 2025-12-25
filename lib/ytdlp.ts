@@ -146,3 +146,60 @@ export async function updateYtDlp(): Promise<string> {
   }
 }
 
+export async function getYoutubePlaylistMetadata(url: string): Promise<Array<{
+  id: string
+  title: string
+  channel: string
+  thumbnail: string
+  duration: number
+}>> {
+  try {
+    console.log('[getYoutubePlaylistMetadata] Fetching playlist metadata for URL:', url)
+    const stdout = await executeYtDlp([
+      '--dump-json',
+      '--no-warnings',
+      '--flat-playlist',  // Extract playlist info
+      url
+    ], 120000)  // 2 minute timeout for playlists
+    
+    // Split by newlines and parse each JSON object
+    const lines = stdout.trim().split('\n')
+    const videos = lines.map(line => JSON.parse(line)).filter((data: any) => data && data.id)
+    
+    console.log('[getYoutubePlaylistMetadata] Found', videos.length, 'videos in playlist')
+    
+    return videos.map((data: any) => {
+      console.log('[getYoutubePlaylistMetadata] Processing video:', data.title)
+      
+      // Get best thumbnail URL
+      let thumbnail = ''
+      if (data.thumbnails && Array.isArray(data.thumbnails) && data.thumbnails.length > 0) {
+        const bestThumbnail = data.thumbnails
+          .filter((t: any) => t.url)
+          .sort((a: any, b: any) => {
+            const widthA = a.width || 0
+            const widthB = b.width || 0
+            return widthB - widthA
+          })[0]
+        thumbnail = bestThumbnail?.url || data.thumbnails[0]?.url || ''
+      }
+      
+      // Fallback to standard YouTube thumbnail URLs
+      if (!thumbnail && data.id) {
+        thumbnail = `https://i.ytimg.com/vi/${data.id}/hqdefault.jpg`
+      }
+      
+      return {
+        id: data.id,
+        title: data.title,
+        channel: data.channel || data.uploader || 'Unknown',
+        thumbnail,
+        duration: data.duration || 0,
+      }
+    })
+  } catch (error) {
+    console.error('[getYoutubePlaylistMetadata] Error:', error)
+    throw new Error(`Failed to get playlist metadata: ${error}`)
+  }
+}
+
