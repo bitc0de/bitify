@@ -125,7 +125,7 @@ export default function PlayerBar({
       audio.removeEventListener('canplay', handleCanPlay)
       audio.removeEventListener('ended', handleEnded)
     }
-  }, [onNext])
+  }, [onNext, currentSong])
 
   const togglePlay = () => {
     if (audioRef.current) {

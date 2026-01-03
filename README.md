@@ -25,9 +25,18 @@ Self-hosted YouTube music streaming application built with Next.js.
 - Toast notifications for user feedback
 - Simple JSON file storage - no database setup required
 - Easy Docker deployment
+- **Smart search**: Search YouTube directly from the app or paste URLs
+
 ## Recent Updates
 
-### v1.1.0 - Latest Improvements
+### v1.2.0 - Latest Improvements
+
+- ✅ **YouTube search integration**: Search for songs directly in the app without needing URLs
+- ✅ **Smart input detection**: Automatically detects if input is a URL or search query
+- ✅ **Live search results**: Real-time search with thumbnails, duration, and channel info
+- ✅ **Progress bar fix**: Fixed playbar not advancing for single songs
+
+### v1.1.0 - Previous Updates
 
 - ✅ **Direct song deletion**: Removed confirmation dialogs when deleting songs from home page for faster workflow
 - ✅ **Bulk playlist creation**: Add entire playlists directly from YouTube playlist URLs
@@ -137,12 +146,13 @@ If you prefer to build the Docker image yourself:
 
 ## Usage
 
-1. **Add a song**: Paste a YouTube URL in the input field and click "Add"
-2. **Play a song**: Click the play button on any song card
-3. **Control playback**: Use the player controls at the bottom of the page
-4. **Create playlists**: Navigate to Playlists and create your custom collections
-5. **Shuffle mode**: Toggle shuffle to randomize playback order
-6. **Navigate freely**: Music continues playing as you browse different pages
+1. **Add a song**: Search for songs by artist/title or paste a YouTube URL in the input field
+2. **Search**: Type any song name or artist and select from the results dropdown
+3. **Play a song**: Click the play button on any song card
+4. **Control playback**: Use the player controls at the bottom of the page
+5. **Create playlists**: Navigate to Playlists and create your custom collections
+6. **Shuffle mode**: Toggle shuffle to randomize playback order
+7. **Navigate freely**: Music continues playing as you browse different pages
 
 
 ## Data Storage

@@ -203,3 +203,65 @@ export async function getYoutubePlaylistMetadata(url: string): Promise<Array<{
   }
 }
 
+export async function searchYoutube(query: string, maxResults: number = 10): Promise<Array<{
+  id: string
+  title: string
+  channel: string
+  thumbnail: string
+  duration: number
+}>> {
+  try {
+    console.log('[searchYoutube] Searching for:', query)
+    const stdout = await executeYtDlp([
+      '--dump-json',
+      '--no-warnings',
+      '--flat-playlist',
+      '--no-playlist',
+      `ytsearch${maxResults}:${query}`
+    ], 60000)  // 60 second timeout
+    
+    // Split by newlines and parse each JSON object
+    const lines = stdout.trim().split('\n').filter(line => line.trim())
+    const videos = lines.map(line => {
+      try {
+        return JSON.parse(line)
+      } catch (e) {
+        return null
+      }
+    }).filter((data: any) => data && data.id)
+    
+    console.log('[searchYoutube] Found', videos.length, 'results')
+    
+    return videos.map((data: any) => {
+      // Get best thumbnail URL
+      let thumbnail = ''
+      if (data.thumbnails && Array.isArray(data.thumbnails) && data.thumbnails.length > 0) {
+        const bestThumbnail = data.thumbnails
+          .filter((t: any) => t.url)
+          .sort((a: any, b: any) => {
+            const widthA = a.width || 0
+            const widthB = b.width || 0
+            return widthB - widthA
+          })[0]
+        thumbnail = bestThumbnail?.url || data.thumbnails[0]?.url || ''
+      }
+      
+      // Fallback to standard YouTube thumbnail URLs
+      if (!thumbnail && data.id) {
+        thumbnail = `https://i.ytimg.com/vi/${data.id}/hqdefault.jpg`
+      }
+      
+      return {
+        id: data.id,
+        title: data.title,
+        channel: data.channel || data.uploader || 'Unknown',
+        thumbnail,
+        duration: data.duration || 0,
+      }
+    })
+  } catch (error) {
+    console.error('[searchYoutube] Error:', error)
+    throw new Error(`Failed to search YouTube: ${error}`)
+  }
+}
+
